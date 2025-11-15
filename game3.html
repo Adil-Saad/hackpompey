@@ -1,0 +1,393 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Grid Bank – Money = Power</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@600;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0f172a; --card:#111b36; --panel:#0b1b31; --accent:#22c55e; --accent2:#38bdf8;
+    --warn:#fbbf24; --danger:#ef4444; --ink:#f1f5f9; --muted:#94a3b8;
+    --gold:#f59e0b; --purple:#a78bfa; --rose:#fb7185;
+  }
+  *{box-sizing:border-box}
+  body{margin:0; font-family:'Nunito',system-ui,Segoe UI,Roboto,sans-serif; background:linear-gradient(180deg,#0b1024,#0b1733 60%,#0a1a3a); color:var(--ink);}
+  header{position:sticky; top:0; z-index:10; display:flex; align-items:center; gap:12px; padding:14px 18px; background:#0b1330; border-bottom:1px solid #1f2a57;}
+  header h1{margin:0; font-size:20px; letter-spacing:.3px}
+  header .right{margin-left:auto; display:flex; gap:10px; align-items:center;}
+  .btn, button{cursor:pointer; border:none; border-radius:12px; padding:10px 14px; font-weight:800}
+  .btn-primary{background:var(--accent); color:#052e15;}
+  .btn-alt{background:#1e2a53; color:#cde;}
+  .btn-ghost{background:transparent; color:#cde; border:1px solid #2a3a70;}
+  input[type=file]{display:none}
+  label.file{background:#1e2a53; color:#cde; padding:10px 12px; border-radius:10px; cursor:pointer;}
+  main{max-width:1200px; margin:14px auto; padding:0 14px;}
+  .toprow{display:grid; grid-template-columns: 1.2fr 1fr; gap:14px; margin-bottom:14px;}
+  .panel{background:linear-gradient(180deg,#0d1b36,#0c1a33); border:1px solid #1f2a57; border-radius:16px; padding:14px; box-shadow:0 8px 24px #0005;}
+  .panel h2{margin:0 0 10px; font-size:18px}
+  .meter{height:170px; background:linear-gradient(90deg,#0ea5e9,#22c55e); border-radius:12px; position:relative; overflow:hidden}
+  .scale{position:absolute; inset:0; background:linear-gradient(90deg,var(--danger) 0 12%, var(--warn) 12% 28%, var(--accent) 28% 72%, var(--warn) 72% 88%, var(--danger) 88% 100%); opacity:.28}
+  .needle{position:absolute; top:0; width:8px; height:100%; background:#fff; left:50%; transform:translateX(-50%); border-radius:4px; box-shadow:0 0 10px #fff9}
+  .labels{display:flex; justify-content:space-between; margin-top:8px; font-size:12px; font-weight:800}
+  .labels span{padding:3px 6px; border-radius:8px}
+  .labels .good{background:#0a6;}.labels .warn{background:#7a5a00}.labels .bad{background:#7a0010}
+  .stats{display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-top:10px}
+  .stat{background:#0d2447; border:1px solid #1f2a57; border-radius:12px; padding:10px; text-align:center}
+  .stat .label{font-size:12px; color:var(--muted)}
+  .stat .value{font-size:22px; font-weight:800}
+  .coach{margin-top:10px; padding:10px; border-radius:12px; background:#0d2c55; border:1px solid #25457a; color:#d9e8ff}
+  .grid{display:grid; grid-template-columns: 1fr 1fr; gap:14px}
+  .cards-area{min-height:220px; display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:12px}
+  .card{position:relative; background:linear-gradient(180deg,#111b36,#0f1b32); border:1px solid #273660; border-radius:14px; padding:12px; display:flex; gap:12px; align-items:flex-start}
+  .badge{position:absolute; top:8px; right:8px; font-size:12px; background:#1e2a53; color:#cde; padding:3px 8px; border-radius:10px; border:1px solid #2a3a70}
+  .icon{font-size:30px; width:42px; text-align:center}
+  .cname{font-weight:800}
+  .cmeta{font-size:12px; color:#9fb3cf}
+  .cdesc{font-size:12px; color:#cfe; margin-top:6px}
+  .card button{margin-left:auto; background:var(--accent2); color:#072133; font-weight:900; padding:8px 10px}
+  .hand{display:flex; gap:10px; overflow:auto; padding-bottom:4px}
+  .token{background:#12224a; border:1px solid #2a3a70; border-radius:10px; padding:8px 10px; font-size:13px}
+  .log{background:#0e274b; border:1px solid #294a7d; border-radius:12px; height:220px; overflow:auto; padding:10px; font-size:12px}
+  .footer{display:flex; gap:10px; justify-content:flex-end}
+  .pill{display:inline-block; padding:4px 10px; border-radius:999px; border:1px solid #2a3a70; background:#12224a; color:#cde; font-size:12px}
+  @media (max-width: 950px){ .toprow{grid-template-columns:1fr} .grid{grid-template-columns:1fr}}
+  .card {
+  position: relative;
+  padding: 32px 12px 12px 12px; /* extra padding top for the badge */
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-start;
+  /* background, border, etc. */
+}
+.badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: #1e2a53;
+  color: #fff;
+  padding: 3px 8px;
+  border-radius: 10px;
+  border: 1px solid #2a3a70;
+  font-size: 12px;
+  z-index: 2;
+}
+.card button {
+  align-self: flex-end;
+  margin-top: 16px;
+  background: #238bdf8;
+  color: #fff;
+  padding: 8px 14px;
+  border-radius: 12px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+</style>
+
+</head>
+<body>
+<header>
+  <h1>💳 Grid Bank — Money = Power</h1>
+  <div class="right">
+    <label class="file">📂 Load Data <input id="xlsx" type="file" accept=".xlsx,.xls" /></label>
+    <button id="new" class="btn-primary">Start New Game</button>
+    <span class="pill">Round: <b id="round">0/12</b></span>
+    <span class="pill">⏱ <b id="clock">--:--</b></span>
+  </div>
+</header>
+
+<main>
+  <div class="toprow">
+    <!-- Balance Panel -->
+    <div class="panel">
+      <h2>Balance the Bank (Green = Good)</h2>
+      <div class="meter">
+        <div class="scale"></div>
+        <div id="needle" class="needle"></div>
+      </div>
+      <div class="labels"><span class="bad">Bankrupt</span><span class="warn">Risky</span><span class="good">Good (±£2)</span><span class="warn">Risky</span><span class="bad">Waste</span></div>
+      <div class="stats">
+        <div class="stat"><div class="label">Income (Generation)</div><div class="value" id="income">£0</div></div>
+        <div class="stat"><div class="label">Expenses (Demand)</div><div class="value" id="expense">£0</div></div>
+        <div class="stat"><div class="label">End Balance</div><div class="value" id="balance">£0</div></div>
+        <div class="stat"><div class="label">Event</div><div class="value" id="event">—</div></div>
+      </div>
+      <div id="coach" class="coach">Welcome! Your money is your power. Keep your end‑of‑round balance inside the green band (±£2).</div>
+      <div style="display:flex; gap:10px; margin-top:10px;">
+        <button id="end" class="btn-alt" disabled>End Round</button>
+        <button id="skip" class="btn-ghost" disabled>Skip (−2 pts)</button>
+      </div>
+    </div>
+    <!-- Scoreboard -->
+    <div class="panel">
+      <h2>Scoreboard</h2>
+      <div class="stats">
+        <div class="stat"><div class="label">Points</div><div class="value" id="points">0</div></div>
+        <div class="stat"><div class="label">Cash</div><div class="value" id="cash">£10,000</div></div>
+        <div class="stat"><div class="label">Carbon Saved</div><div class="value" id="carbon">0.0t</div></div>
+        <div class="stat"><div class="label">Investments</div><div class="value" id="invest">0</div></div>
+      </div>
+      <div style="margin-top:10px;">
+        <span class="pill" id="rows">Rows: 0</span>
+        <span class="pill" id="ts">Latest: —</span>
+      </div>
+      <div style="margin-top:12px; font-size:13px; color:#cfe">
+        Rules: End in green = +10 pts, yellow = +5 pts, red = −20 pts. Avoided peak = +10 bonus. Waste (too much cash left) = −5 (represents spilling cheap renewable).
+      </div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <!-- Action Cards -->
+    <div class="panel">
+      <h2>Your Cards</h2>
+      <div id="cards" class="cards-area"></div>
+    </div>
+    <!-- Log + Hand -->
+    <div class="panel">
+      <h2>Round Log</h2>
+      <div id="log" class="log"></div>
+      <h2 style="margin-top:12px;">Investments</h2>
+      <div id="hand" class="hand"></div>
+    </div>
+  </div>
+</main>
+
+<footer class="footer" style="max-width:1200px; margin:10px auto; padding:0 14px;">
+  <span class="pill">Tips: Battery Bond = interest on peaks • EV Saver = delay expense • Factory Pause = big one‑off cut • Heat Hedge = protect next spike • Community Cashback = chance save</span>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<script>
+/* ======= Data layer (optional workbook) ======= */
+let rows=[], idx=0;
+document.getElementById('xlsx').addEventListener('change', async (e)=>{
+  const f=e.target.files?.[0]; if(!f) return;
+  const ab=await f.arrayBuffer();
+  const wb=XLSX.read(ab,{type:'array'});
+  const name=Object.keys(wb.Sheets).find(n=>n.toLowerCase().includes('current'))||Object.keys(wb.Sheets)[0];
+  const sheet=wb.Sheets[name];
+  const json=XLSX.utils.sheet_to_json(sheet,{defval:null});
+  rows=json.map(r=>{
+    const t=r.Timestamp||r.timestamp||Object.values(r)[0];
+    const channels={...r}; delete channels.Timestamp; delete channels.timestamp;
+    for(const k in channels) channels[k]=Number(channels[k])||0;
+    return {t, channels:Object.values(channels)};
+  }).filter(r=>r.t && r.channels.length);
+  rows.sort((a,b)=>new Date(a.t)-new Date(b.t));
+  idx=Math.max(0, rows.length-60);
+  document.getElementById('rows').textContent='Rows: '+rows.length;
+  document.getElementById('ts').textContent='Latest: '+(rows.at(-1)?.t||'—');
+  log(`Loaded ${rows.length} measurements from workbook.`);
+});
+
+/* ======= Game model ======= */
+const TOTAL=12;
+let round=0, points=0, cash=10000, carbon=0, investments=0;
+let income=0, expense=0, balance=0, eventName='—';
+let gameOn=false;
+
+const deck=[
+  {key:'bond', icon:'💹', name:'Battery Bond', cost:800, text:'+£200 interest on every avoided peak', play:playBond},
+  {key:'ev', icon:'🚗', name:'EV Smart Saver', cost:300, text:'Delay £4 expense this round', play:()=>{expense-=4; coach('EV charging shifted −£4 expense.'); log('EV Smart Saver: −£4 expense');}},
+  {key:'pause', icon:'🏭', name:'Factory Pause', cost:1200, text:'Reduce expense by £8 this round', play:()=>{expense-=8; coach('Factory paused −£8 expense.'); log('Factory Pause: −£8 expense');}},
+  {key:'hedge', icon:'🧊', name:'Heat Pump Hedge', cost:200, text:'Next spike reduces by £5', play:playHedge},
+  {key:'dr', icon:'📣', name:'Community Cashback', cost:500, text:'80% chance to save £5', play:()=>{ if(Math.random()<0.8){expense-=5; coach('Community helped −£5 expense.'); log('Community Cashback: success −£5');} else {coach('Few joined. No savings.'); log('Community Cashback: no effect');} }},
+];
+
+const hand=[]; // for persistent investments (bonds, hedges)
+let hedged=false;
+
+function renderCards(){
+  const area=document.getElementById('cards');
+  area.innerHTML='';
+  deck.forEach(c=>{
+    const el=document.createElement('div');
+    el.className='card';
+    el.innerHTML=`
+      <span class="badge">£${c.cost}</span>
+      <div class="icon">${c.icon}</div>
+      <div>
+        <div class="cname">${c.name}</div>
+        <div class="cmeta">${c.text}</div>
+        <div class="cdesc">Cost now, benefit later. Great during peaks.</div>
+      </div>
+      <button>Play</button>
+    `;
+    el.querySelector('button').onclick=()=>playCard(c);
+    area.appendChild(el);
+  });
+}
+
+function renderHand(){
+  const wrap=document.getElementById('hand');
+  wrap.innerHTML='';
+  hand.forEach(t=>{
+    const el=document.createElement('div');
+    el.className='token';
+    el.textContent=t;
+    wrap.appendChild(el);
+  });
+}
+
+function log(msg){
+  const el=document.getElementById('log');
+  const p=document.createElement('div');
+  p.textContent='• '+msg;
+  el.appendChild(p);
+  el.scrollTop=el.scrollHeight;
+}
+
+function coach(msg){ document.getElementById('coach').textContent=msg; }
+
+function updateUI(){
+  document.getElementById('income').textContent='£'+income;
+  document.getElementById('expense').textContent='£'+expense;
+  document.getElementById('balance').textContent='£'+balance;
+  document.getElementById('event').textContent=eventName;
+  document.getElementById('points').textContent=points;
+  document.getElementById('cash').textContent='£'+cash.toLocaleString();
+  document.getElementById('carbon').textContent=carbon.toFixed(1)+'t';
+  document.getElementById('invest').textContent=investments;
+
+  // map balance delta to needle: −20..+20 => 0..100%
+  const delta=income-expense;
+  const pct=Math.max(0, Math.min(1, (delta+20)/40));
+  document.getElementById('needle').style.left=(pct*100)+'%';
+}
+
+function playCard(c){
+  if(!gameOn) return;
+  if(cash < c.cost){ coach('Not enough cash.'); return; }
+  cash -= c.cost;
+  carbon += 0.05; // small savings proxy for all investments
+  if(c.play) c.play();
+  updateUI();
+}
+
+function playBond(){
+  hand.push('Battery Bond (+£200/peak)');
+  investments++;
+  log('Bought Battery Bond. Earn +£200 interest for each peak avoided.');
+  renderHand();
+}
+
+function playHedge(){
+  hedged=true;
+  hand.push('Heat Hedge (next spike −£5)');
+  log('Hedge set: next spike reduces by £5 expense.');
+  renderHand();
+}
+
+function deriveEventFromChannels(ch){
+  const max=Math.max(...ch), min=Math.min(...ch), avg=ch.reduce((a,b)=>a+b,0)/ch.length, spread=max-min;
+  if (max>130 || spread>70) return { name:'Heat Wave', exp:+8, inc:0, spike:true };
+  if (spread>50 && avg<100) return { name:'Windy', exp:-3, inc:+5, spike:false };
+  if (avg<90 && spread<25) return { name:'Calm', exp:+5, inc:-5, spike:true };
+  if (avg>115) return { name:'Evening Rush', exp:+7, inc:0, spike:true };
+  if (min<20) return { name:'System Fault', exp:+10, inc:-6, spike:true };
+  return { name:'Normal', exp:0, inc:0, spike:false };
+}
+
+function sampleEvent(){
+  if(rows.length){
+    const r=rows[Math.min(idx++, rows.length-1)];
+    return deriveEventFromChannels(r.channels);
+  }
+  // fallback random
+  const pick=[ 'Normal','Windy','Evening Rush','Heat Wave','Calm','System Fault' ][Math.floor(Math.random()*6)];
+  const map={
+    'Normal':{name:'Normal',exp:0,inc:0,spike:false},
+    'Windy':{name:'Windy',exp:-3,inc:+5,spike:false},
+    'Evening Rush':{name:'Evening Rush',exp:+7,inc:0,spike:true},
+    'Heat Wave':{name:'Heat Wave',exp:+8,inc:0,spike:true},
+    'Calm':{name:'Calm',exp:+5,inc:-5,spike:true},
+    'System Fault':{name:'System Fault',exp:+10,inc:-6,spike:true},
+  };
+  return map[pick];
+}
+
+/* ======= Rounds ======= */
+function startGame(){
+  gameOn=true; round=0; points=0; cash=10000; carbon=0; investments=0; hedged=false;
+  hand.length=0; renderHand();
+  document.getElementById('end').disabled=false;
+  document.getElementById('skip').disabled=false;
+  coach('Round 1: Buy cards to prepare, then End Round.');
+  nextRound();
+}
+
+function nextRound(){
+  round++;
+  document.getElementById('round').textContent=round+'/12';
+
+  // base income/expense
+  income = 100 + Math.round(7*Math.cos(round/3) + 6*Math.random());
+  expense = 100 + Math.round(8*Math.sin(round/2) + 6*Math.random());
+
+  // event
+  const ev = sampleEvent();
+  eventName = ev.name;
+  expense += ev.exp;
+  income += ev.inc;
+
+  // hedge
+  if(hedged && ev.spike){ expense -= 5; hedged=false; log('🧊 Hedge reduced this spike by £5'); }
+
+  balance = income - expense;
+  updateUI();
+  log(`Round ${round}: ${eventName} | Income £${income} | Expense £${expense}`);
+}
+
+function endRound(){
+  if(!gameOn) return;
+
+  // Scoring
+  const gap=Math.abs(balance);
+  let pts=0, peakAvoided=false;
+  if(gap<=2){ pts=10; peakAvoided = /Rush|Heat|Calm/.test(eventName); }
+  else if(gap<=6){ pts=5; }
+  else { pts=-20; }
+
+  if(peakAvoided){ pts+=10; log('🎯 Peak avoided +10'); // interest from bonds
+    const bonds = hand.filter(t=>t.includes('Battery Bond')).length;
+    if(bonds>0){ const interest=200*bonds; cash+=interest; log(`💹 Bond interest +£${interest}`); }
+  }
+
+  if(balance>8){ pts-=5; log('⚠ Wasted cheap renewable −5'); }
+
+  points += pts;
+
+  // Proceed
+  if(round>=TOTAL){ finishGame(); }
+  else { nextRound(); }
+  updateUI();
+}
+
+function skipRound(){ points-=2; log('⏭️ Skipped −2'); endRound(); }
+
+function finishGame(){
+  gameOn=false;
+  document.getElementById('end').disabled=true;
+  document.getElementById('skip').disabled=true;
+  coach(`Game Over! Points ${points}. Cash £${cash.toLocaleString()}. Carbon saved ${carbon.toFixed(1)}t.`);
+}
+
+/* ======= UI wiring ======= */
+document.getElementById('new').onclick=()=>{ startGame(); };
+document.getElementById('end').onclick=()=>{ endRound(); };
+document.getElementById('skip').onclick=()=>{ skipRound(); };
+renderCards();
+updateUI();
+
+setInterval(()=>{
+  const d=new Date();
+  document.getElementById('clock').textContent=String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+},1000);
+</script>
+</body>
+</html>
